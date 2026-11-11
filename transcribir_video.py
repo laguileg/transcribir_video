@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 import time
 from pathlib import Path
@@ -42,6 +43,35 @@ else:
 RUTA_LOG = CARPETA_SCRIPT / "transcribir_video.log"
 
 log = logging.getLogger("transcribir_video")
+
+# Oculta el aviso de Hugging Face sobre symlinks en Windows (inofensivo).
+os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+
+
+def parchear_pyav() -> None:
+    """Compatibilidad entre faster-whisper 1.2 y PyAV 16+.
+
+    faster-whisper llama a av.open(..., metadata_errors="ignore"), parámetro
+    que las versiones nuevas de PyAV eliminaron. Este parche lo descarta
+    si PyAV no lo acepta, sin afectar al resto de la llamada.
+    """
+    import av
+
+    open_original = av.open
+    if getattr(open_original, "_parcheado", False):
+        return
+
+    def open_compatible(*args, **kwargs):
+        try:
+            return open_original(*args, **kwargs)
+        except TypeError as error:
+            if "metadata_errors" not in str(error):
+                raise
+            kwargs.pop("metadata_errors", None)
+            return open_original(*args, **kwargs)
+
+    open_compatible._parcheado = True
+    av.open = open_compatible
 
 
 def configurar_logging() -> None:
@@ -99,6 +129,7 @@ def transcribir(video: Path, modelo: str, idioma: str, carpeta_salida: Path) -> 
         from faster_whisper import WhisperModel
     except ImportError:
         raise SystemExit("Falta la librería faster-whisper. Instálala con:\n  py -m pip install faster-whisper")
+    parchear_pyav()
 
     log.info("Cargando modelo '%s' (la primera vez se descarga, puede tardar)...", modelo)
     modelo_whisper = WhisperModel(modelo, device="auto", compute_type="int8")
