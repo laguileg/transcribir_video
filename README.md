@@ -35,3 +35,7 @@ Sin argumentos abre un selector de archivo.
 | `medium`, `turbo`, `large-v3` | lento | muy buena |
 
 Los videos, audios y transcripciones no se versionan (ver `.gitignore`).
+
+## Licencia
+
+[MIT](LICENSE): puedes usar, modificar y compartir este código libremente, manteniendo el aviso de autoría.
