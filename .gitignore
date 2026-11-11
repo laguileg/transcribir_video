@@ -1,0 +1,31 @@
+# Entorno y caché de Python
+.venv/
+__pycache__/
+*.pyc
+
+# Empaquetado
+build/
+dist/
+*.spec
+*.exe
+*.zip
+
+# Configuración y secretos
+.env
+*token_cache*
+
+# Logs
+*.log
+
+# Videos, audios y transcripciones (contienen información de reuniones)
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.webm
+*.mp3
+*.wav
+*.m4a
+*.txt
+!requirements.txt
+*.srt
